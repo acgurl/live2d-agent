@@ -4,6 +4,7 @@ release/
 .runtime/
 test-results/
 playwright-report/
+test/live2d-agent/
 *.log
 .DS_Store
 Thumbs.db
