@@ -26,7 +26,8 @@
     "install:all": "node scripts/setup.mjs",
     "setup:core": "node scripts/setup-core.mjs",
     "setup:model": "node scripts/setup-model.mjs",
-    "install:skill": "node scripts/install-skill.mjs"
+    "install:skill": "node scripts/install-skill.mjs",
+    "setup:models": "node scripts/setup-models.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",

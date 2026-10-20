@@ -138,8 +138,10 @@ the saved path to the user; attach/show the image when the interface supports it
 "%USERPROFILE%\.live2d-agent\bin\live2d.cmd" model load <model-id>
 ```
 
-If the model is not installed, tell the user to run
-`npm run setup:model -- --from <dir>`; do not download models yourself.
+If the model is not installed, tell the user to add it to
+`live2d.models.json` and run `npm run setup:models -- --models <id>`, or install
+a local directory with `npm run setup:model -- --from <dir>`; do not download
+models yourself.
 
 ### Move or resize the pet
 

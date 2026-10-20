@@ -175,6 +175,10 @@ CLI/MCP ──HTTP POST /api/v1/commands──► server.ts
 
 ## Configuration and persistence
 
+- Repository-level install defaults live in `live2d.config.json` and
+  `live2d.models.json`. Only the setup scripts read them; the runtime never
+  depends on the repository files. The active model id chosen from the catalog
+  is written to the runtime `config.json`.
 - `config.json` stores window bounds/flags, render scale/opacity, behaviour
   (idle motion, gaze follow, blink, default expression), bubble styling/TTL,
   speech defaults and the active model id. Writes are debounced in the main
@@ -183,6 +187,24 @@ CLI/MCP ──HTTP POST /api/v1/commands──► server.ts
   the pid is dead or `/health` fails.
 - `install.json` is written by the app on start and by `npm run install:skill`;
   the CLI uses it (plus a repo-root fallback) to auto-start Electron.
+
+## Setup pipeline
+
+`scripts/setup.mjs` is the one-command entry point:
+
+```
+live2d.config.json --models.file--> live2d.models.json
+        |                                   |
+        +--> core URL                       +--> per-model url/variant/display fields
+        |
+        +--> scripts/lib/models.mjs --> download/cache zip --> setup-model.mjs
+                                      --> write <model>/live2d-agent.json
+                                      --> apply models.default to runtime config.json
+```
+
+`scripts/setup-models.mjs` reuses the same catalog helpers to install or list
+models without rebuilding. `setup-model.mjs` still handles local directories
+and validates every `.model3.json` reference before copying.
 
 ## Build pipeline
 

@@ -26,21 +26,33 @@ unless noted; no test framework is required.
 ## 0.1 One-command setup (`npm run setup`)
 
 - [ ] `node --check scripts/setup.mjs` exits 0.
-- [ ] `node scripts/setup.mjs --help` exits 0 and documents `--force`,
-      `--no-deps`, `--no-build`, `--no-launch`, `--no-core`, `--no-model`,
-      `--no-verify`, `--core-url`, `--model-url`, `--id`, `--variant`,
-      `--scale`, `--skill-dest`.
+- [ ] `node --check scripts/setup-models.mjs` and `node --check
+      scripts/lib/models.mjs` exit 0.
+- [ ] `node scripts/setup.mjs --help` exits 0 and documents `--config`,
+      `--catalog`, `--model`, `--models`, `--force`, `--no-deps`,
+      `--no-build`, `--no-launch`, `--no-core`, `--no-model`,
+      `--no-verify`, `--core-url`, `--skill-dest`.
+- [ ] `node scripts/setup-models.mjs --help` exits 0 and documents `--list`,
+      `--model`, `--models`, `--catalog`, `--no-default`.
 - [ ] In a clean `LIVE2D_AGENT_HOME`, `npm run setup -- --no-build --no-launch`
-      creates `<runtime>/core/live2dcubismcore.min.js` and
-      `<runtime>/models/<id>` with a top-level `.model3.json`.
-- [ ] Re-running setup without `--force` skips the verified Core/model;
-      `--force` re-downloads/reinstalls.
-- [ ] Editing `live2d.config.json` (`model.scale`, `model.displayName`) and
-      re-running setup updates `<model>/live2d-agent.json`.
-- [ ] Changing `model.variant` to `hiyori_free` with `--force` installs the
-      free runtime instead of `hiyori_pro`.
-- [ ] A wrong `core.sha256`/`model.sha256` fails with a SHA-256 mismatch;
-      `--no-verify` overrides it (test only with trusted sources).
+      creates `<runtime>/core/live2dcubismcore.min.js` and every model listed in
+      `models.install` (default `hiyori` and `hiyori-free`), each with a
+      top-level `.model3.json`; `<runtime>/config.json` has `model` equal to
+      `models.default`.
+- [ ] Re-running setup without `--force` skips the verified Core and installed
+      models; `--force` re-downloads/reinstalls them.
+- [ ] Editing a catalog entry (`scale`, `displayName`) and re-running setup
+      updates `<model>/live2d-agent.json` without a download.
+- [ ] `npm run setup -- --model hiyori-free` installs only `hiyori-free` and
+      makes it the default; `npm run setup -- --models hiyori` installs only
+      `hiyori`.
+- [ ] `npm run setup:models -- --list` prints both catalog models and their
+      installed state; `npm run setup:models -- --models hiyori-free` installs
+      without rebuilding.
+- [ ] Two catalog models sharing one `url` download the zip once (a single
+      `cache/model-*.zip`).
+- [ ] A wrong `core.sha256`/catalog model `sha256` fails with a SHA-256
+      mismatch; `--no-verify` overrides it (test only with trusted sources).
 - [ ] `setup.skillDest` installs the skill and creates the stable launchers;
       `--skill-dest <dir>` overrides it.
 ## 1. Syntax and build
@@ -49,6 +61,8 @@ unless noted; no test framework is required.
 - [ ] `node --check scripts/setup-model.mjs` exits 0.
 - [ ] `node --check scripts/install-skill.mjs` exits 0.
 - [ ] `node --check scripts/setup.mjs` exits 0.
+- [ ] `node --check scripts/setup-models.mjs` and `node --check
+      scripts/lib/models.mjs` exit 0.
 - [ ] `npm run typecheck` exits 0.
 - [ ] `npm run lint` exits 0 (or only pre-existing warnings are reported).
 - [ ] `npm run build` exits 0 and creates:
@@ -111,6 +125,21 @@ texture and optional motions/expressions.
       exits 0.
 - [ ] `git status` shows no model files in the repository.
 
+## 3.1 setup-models.mjs
+
+- [ ] `npm run setup:models -- --list` exits 0, prints every catalog id,
+      display name, variant and installed state.
+- [ ] `npm run setup:models -- --models hiyori-free` installs only that model;
+      the other catalog models are untouched.
+- [ ] `npm run setup:models -- --model hiyori` installs only `hiyori` and
+      writes `model: "hiyori"` to the runtime `config.json`.
+- [ ] `--no-default` installs without changing `config.json`.
+- [ ] An unknown id in `--models` exits 1 and lists the available ids.
+- [ ] A missing catalog file exits 1 with a hint to create
+      `live2d.models.json` or set `models.file`.
+- [ ] Re-running without `--force` reports "already installed"; `--force`
+      reinstalls.
+
 ## 4. install-skill.mjs
 
 - [ ] `node scripts/install-skill.mjs --help` exits 0.
@@ -122,8 +151,9 @@ texture and optional motions/expressions.
     node fallback) and POSIX `live2d`, `live2d-mcp`;
   - `<temp>/skills/live2d-pet/` with `SKILL.md` and `references/`.
 - [ ] Re-running without `--force` exits 1; with `--force` succeeds.
-- [ ] Printed snippets for Claude Desktop, Claude Code and Cursor reference the
-      generated `live2d-mcp.cmd` and are valid JSON (paste into a JSON parser).
+- [ ] The printed MCP block (one config for Claude Desktop/Cursor), the Claude
+      Code command and the direct-node fallback reference the generated
+      `live2d-mcp.cmd` / real app root; the JSON block parses.
 - [ ] Printed skill destinations include `<dest>/live2d-pet` and the user-level
       Claude Code path.
 - [ ] `"<runtime>\bin\live2d.cmd" version` runs and prints JSON with `--json`.

@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "models": {
+    "hiyori": {
+      "displayName": "Hiyori",
+      "url": "https://acgurl.qzz.io/file/1792491911029_hiyori_zh-Hans.zip",
+      "variant": "hiyori_pro",
+      "scale": 1.2
+    },
+    "hiyori-free": {
+      "displayName": "Hiyori (Free)",
+      "url": "https://acgurl.qzz.io/file/1792491911029_hiyori_zh-Hans.zip",
+      "variant": "hiyori_free",
+      "scale": 1.2
+    }
+  }
+}

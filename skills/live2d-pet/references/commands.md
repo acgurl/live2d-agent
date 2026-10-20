@@ -242,6 +242,8 @@ live2d model load hiyori
 - `model load <id>`: validates the model directory and switches the scene. The
   loaded id is persisted in `config.json`.
 - Model ids may contain letters, digits, dot, underscore and dash (max 128).
+- Install catalog models with `npm run setup:models -- --models <id>`; install a
+  local model directory with `npm run setup:model -- --from <dir>`.
 
 ### window
 

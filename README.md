@@ -4,8 +4,9 @@
 服务器和 Agent Skill 控制。所有通信都只在本机回环地址上进行，不需要云端账号。
 
 > 本仓库**不包含** Live2D Cubism Core，也**不包含任何 Live2D 模型**。默认安装脚本会按
-> `live2d.config.json` 把 Core 和默认模型下载到用户目录（`~/.live2d-agent`），不写入
-> 仓库。Core 是 Live2D 公司的专有软件，模型各有自己的许可；每位使用者需要遵守相应条款。
+> `live2d.config.json` 和 `live2d.models.json` 把 Core 及 `models.install` 中的模型下载到
+> 用户目录（`~/.live2d-agent`），不写入仓库。Core 是 Live2D 公司的专有软件，模型各有
+> 自己的许可；每位使用者需要遵守相应条款。
 
 ## 功能特性
 
@@ -14,7 +15,8 @@
 - 系统 TTS 语音 + 气泡字幕；可上传本地 `.wav` / `.mp3` / `.ogg` 音频并做口型
 - 窗口移动/缩放、置顶、鼠标穿透、显示/隐藏
 - 截图（只截取伙伴窗口，输出 PNG）
-- 多模型管理：安装、列出、切换，记住上次使用的模型
+- 多模型管理：在 `live2d.models.json` 中声明多个模型，按 `models.install` 批量安装，
+  再通过 `model list` / `model load` 切换，记住上次使用的模型
 - 托盘菜单：显示/隐藏、置顶、鼠标穿透、重置、打开模型/日志目录、退出
 - 本地 HTTP 控制 API + CLI + MCP（stdio）服务器 + Agent Skill
 - 运行时数据（Core、模型、配置、日志、截图、音频缓存）全部在
@@ -39,12 +41,12 @@ npm run setup
 
 1. 缺少依赖时自动执行 `npm install`（含 devDependencies，并补装 Electron 运行时）；
 2. 按 `live2d.config.json` 从官方 CDN 下载 **Cubism Core 6.x（SDK R5）**；
-3. 下载默认模型 zip，自动解压并选择 `hiyori_pro/runtime`，安装到
-   `%USERPROFILE%\.live2d-agent\models\hiyori`；
-4. 写入模型显示配置（`displayName`、`scale` 等）；
+3. 读取 `live2d.models.json`，按 `models.install` 下载并安装其中列出的模型
+   （默认 `hiyori` 和 `hiyori-free`）；同一个 zip 的多个变体只下载一次；
+4. 为每个模型写入显示配置（`displayName`、`scale` 等）；
 5. 构建 renderer/主进程/CLI/MCP/Skill 脚本；
 6. 把 Skill 安装到 `setup.skillDest`（默认 `~/.live2d-agent/skills`）并生成稳定启动器；
-7. 启动桌面伙伴（已启动时只做就绪检查）。
+7. 把 `models.default` 写入运行配置并启动桌面伙伴（已启动时切到默认模型）。
 
 重复执行是幂等的：已安装且校验通过的 Core/模型会跳过。想强制重装或更新默认模型：
 
@@ -58,47 +60,99 @@ npm run setup -- --force
 npm run setup -- --skill-dest "%USERPROFILE%\.claude\skills"
 ```
 
-## 默认安装配置（`live2d.config.json`，可修改）
+## 安装配置（两个文件，均可修改）
 
-默认 Core/模型地址、模型变体、缩放和安装行为都写在仓库根目录的
-[live2d.config.json](live2d.config.json)，不需要改脚本。修改后重新执行
-`npm run setup`；如果模型已存在，加上 `--force` 才会重新下载/安装。
+默认 Core/模型地址、默认模型、要安装的模型列表和安装行为都写在仓库根目录：
 
-> 仓库里需要你修改的安装配置只有 `live2d.config.json` 一个。
+- [live2d.config.json](live2d.config.json)：Core、模型清单文件、默认模型、安装列表；
+- [live2d.models.json](live2d.models.json)：模型清单，一个文件里可以定义任意多个模型。
+
+两个文件都不需要改脚本。修改后重新执行 `npm run setup`；如果模型已存在，
+加上 `--force` 才会重新下载/安装。
+
+> 仓库里需要你修改的安装配置只有上面两个文件。
 > `tsconfig.json` / `vite.config.ts` / `vitest.config.ts` 是构建工具配置；
 > 运行后 `~/.live2d-agent/` 下的 `config.json`（窗口/模型偏好）、`install.json`、
-> `runtime.json` 以及模型目录的 `live2d-agent.json`（可选显示微调）都是自动生成的
+> `runtime.json` 以及每个模型目录的 `live2d-agent.json`（可选显示微调）都是自动生成的
 > 状态文件，不需要手改。
+
+### 主配置：`live2d.config.json`
 
 | 字段 | 默认值 | 作用 |
 | --- | --- | --- |
 | `core.url` | `https://cubism.live2d.com/sdk-web/core/06/live2dcubismcore.min.js` | 官方 Cubism Core 6.x CDN |
 | `core.acceptLicense` | `true` | 运行 setup 即表示接受 Live2D Proprietary Software License；设为 `false` 时拒绝自动下载 |
-| `model.url` | 项目指定的 Hiyori zip | 默认模型压缩包地址 |
-| `model.id` | `hiyori` | 安装目录名，也是 `model load` 的 id |
-| `model.displayName` | `Hiyori` | 模型列表显示名 |
-| `model.variant` | `hiyori_pro` | zip 内变体；可改为 `hiyori_free` |
-| `model.scale` | `1.2` | 默认显示缩放 |
+| `models.file` | `live2d.models.json` | 模型清单文件，相对主配置所在目录 |
+| `models.default` | `hiyori` | 安装后默认加载的模型 id（必须是清单里的 id） |
+| `models.install` | `["hiyori", "hiyori-free"]` | 需要安装的模型 id 列表；不在列表里的定义不会被下载 |
 | `setup.skillDest` | `~/.live2d-agent/skills` | 顺便安装 Skill 到该目录；`null` 跳过 |
 
-可选字段（默认不写，需要时再加）：
+如果 `models.default` 没有出现在 `models.install` 里，setup 会自动把它加入安装列表，
+保证默认模型一定可用。之后用 `live2d model load <id>` 切换模型会写入运行配置；
+重新运行 setup 会再次把 `models.default` 设为默认。
 
-- `core.sha256` / `model.sha256` / `model.size`：下载完整性校验；
-- `setup.installDependencies` / `setup.build` / `setup.launch`：设为 `false` 可跳过对应步骤（默认均为 `true`）；
-- `model.idleGroup` / `model.offsetX` / `model.offsetY`：模型动作组和位置微调。
+### 模型清单：`live2d.models.json`
 
-常用覆盖参数（不必改文件）：
+`models` 是一个以模型 id 为键的对象。多个模型可以共享同一个 zip，只通过
+`variant` 选择压缩包内不同的子目录：
+
+```json
+{
+  "version": 1,
+  "models": {
+    "hiyori": {
+      "displayName": "Hiyori",
+      "url": "https://acgurl.qzz.io/file/1792491911029_hiyori_zh-Hans.zip",
+      "variant": "hiyori_pro",
+      "scale": 1.2
+    },
+    "hiyori-free": {
+      "displayName": "Hiyori (Free)",
+      "url": "https://acgurl.qzz.io/file/1792491911029_hiyori_zh-Hans.zip",
+      "variant": "hiyori_free",
+      "scale": 1.2
+    }
+  }
+}
+```
+
+| 字段 | 必填 | 作用 |
+| --- | --- | --- |
+| `displayName` | 否 | 模型列表显示名，默认用 id |
+| `url` | 否 | 模型 zip 地址；已在本机安装的模型可以省略 |
+| `variant` | 否 | zip 内子目录前缀，如 `hiyori_pro`；省略时自动选择最短路径 |
+| `scale` | 否 | 默认显示缩放，0.1..4 |
+| `sha256` / `size` | 否 | 下载完整性校验 |
+| `offsetX` / `offsetY` | 否 | 显示位置微调，-1..1 |
+| `idleGroup` | 否 | 待机动作组 |
+| `defaultExpression` | 否 | 加载/重置时应用的表情 |
+| `bubbleAnchor` | 否 | 气泡锚点 `{ "x": 0..1, "y": 0..1 }` |
+| `hitActions` | 否 | 点击/触摸区域反应配置 |
+
+新增自己的模型：在 `live2d.models.json` 加一个 id，把 id 加进
+`live2d.config.json` 的 `models.install`；想让它成为默认模型就同时改
+`models.default`，然后重新运行 `npm run setup`。只安装模型、不重新构建时用
+`npm run setup:models`。
+
+可选安装字段（默认不写，需要时再加）：
+
+- `core.sha256`：Core 下载完整性校验；
+- `setup.installDependencies` / `setup.build` / `setup.launch`：设为 `false` 可跳过对应步骤（默认均为 `true`）。
+
+### 常用覆盖参数（不必改文件）
 
 ```bat
-npm run setup -- --model-url "https://example.com/my-model.zip" --id my-model
-npm run setup -- --variant hiyori_free
-npm run setup -- --core-url "https://.../live2dcubismcore.min.js" --force
+npm run setup -- --model hiyori-free
+npm run setup -- --models hiyori,hiyori-free
+npm run setup:models -- --models hiyori-free
+npm run setup -- --force
+npm run setup -- --core-url "https://.../live2dcubismcore.min.js"
 npm run setup -- --no-deps --no-build --no-launch
 npm run setup -- --skill-dest "%USERPROFILE%\.claude\skills"
 ```
 
 > 默认模型 URL 由项目维护者指定。对外分发/商用前请确认你有权使用和再分发该 URL
-> 指向的模型；也可以把 `model.url` 改成你自己的模型压缩包（需包含 `.model3.json`）。
+> 指向的模型；也可以把清单里的 `url` 改成你自己的模型压缩包（需包含 `.model3.json`）。
 
 ## 手动安装（高级/自定义）
 
@@ -200,7 +254,8 @@ npm run install:skill -- --dest "%USERPROFILE%\.claude\skills"
    - POSIX：`~/.live2d-agent/bin/live2d` 和 `live2d-mcp`
    启动器优先用 Electron 的 Node 模式（`ELECTRON_RUN_AS_NODE=1`）运行，找不到
    Electron 时回退到 `node`；
-4. 打印 Claude Desktop / Claude Code / Cursor 的 MCP 配置片段和 Skill 安装位置。
+4. 打印一份可直接用于 Claude Desktop / Cursor 的 MCP 配置、Claude Code 命令和
+   Skill 安装位置。
 
 Skill 文档中的 `node <skill>/scripts/live2d.mjs` 回退需要先运行
 `npm run build:skill`（`npm run build` 已包含）；稳定启动器则使用
@@ -260,6 +315,7 @@ set LIVE2D="%USERPROFILE%\.live2d-agent\bin\live2d.cmd"
 
 %LIVE2D% model list
 %LIVE2D% model load hiyori
+%LIVE2D% model load hiyori-free
 %LIVE2D% window --x 1200 --y 400
 %LIVE2D% window --always-on-top
 %LIVE2D% reset
@@ -311,7 +367,8 @@ src/renderer/   PixiJS + easy-live2d 渲染、气泡、TTS、交互
 src/cli/        live2d 命令行
 src/mcp/        MCP stdio 服务器
 src/shared/     协议、配置、路径、运行时文件、客户端、错误、日志
-scripts/        setup-core / setup-model / install-skill 与构建脚本
+scripts/        setup 编排、setup-models、setup-core、setup-model、install-skill 与构建脚本
+live2d.config.json / live2d.models.json  安装默认值与模型清单
 skills/live2d-pet/  Agent Skill（SKILL.md + references）
 docs/           架构、协议、安全、手工测试文档
 ```
@@ -320,13 +377,14 @@ docs/           架构、协议、安全、手工测试文档
 
 | 命令 | 作用 |
 | --- | --- |
-| `npm run setup` | **一行命令安装/更新并启动**（依赖、Core、默认模型、构建、启动） |
+| `npm run setup` | **一行命令安装/更新并启动**（依赖、Core、models.install、构建、启动） |
 | `npm start` | 用 Electron 启动桌面伙伴 |
 | `npm run dev` | Vite 开发服务器 + Electron |
 | `npm run build` | 构建渲染页、主进程/预加载/CLI/MCP、Skill 脚本 |
 | `npm run build:skill` | 单独构建 Skill 内的 `scripts/live2d.mjs` / `live2d-mcp.mjs` |
 | `npm run setup:core` | 单独安装 Cubism Core（`--from` / `--download --accept-license`） |
-| `npm run setup:model` | 安装模型（`--from` / `--sample hiyori`） |
+| `npm run setup:model` | 安装本地模型目录（`--from` / `--sample hiyori`） |
+| `npm run setup:models` | 只按 `live2d.models.json` 安装/列出模型，不重新构建 |
 | `npm run install:skill` | 安装 Skill、写 install.json、生成启动器、打印 MCP 配置 |
 | `npm run typecheck` | TypeScript 类型检查 |
 | `npm run lint` | oxlint 静态检查 |

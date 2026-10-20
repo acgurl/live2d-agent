@@ -4,12 +4,13 @@
     "url": "https://cubism.live2d.com/sdk-web/core/06/live2dcubismcore.min.js",
     "acceptLicense": true
   },
-  "model": {
-    "id": "hiyori",
-    "displayName": "Hiyori",
-    "url": "https://acgurl.qzz.io/file/1792491911029_hiyori_zh-Hans.zip",
-    "variant": "hiyori_pro",
-    "scale": 1.2
+  "models": {
+    "file": "live2d.models.json",
+    "default": "hiyori",
+    "install": [
+      "hiyori",
+      "hiyori-free"
+    ]
   },
   "setup": {
     "skillDest": "~/.live2d-agent/skills"

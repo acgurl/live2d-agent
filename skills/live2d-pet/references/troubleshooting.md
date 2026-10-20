@@ -36,6 +36,14 @@ the SDK manually and use `--from`.
 
 ### A model is missing (`MODEL_MISSING`, "no model" overlay)
 
+If the model is already declared in `live2d.models.json`:
+
+```bat
+npm run setup:models -- --models <id>
+```
+
+For a model directory you own:
+
 ```bat
 npm run setup:model -- --from "D:\Live2D\MyModel"
 "%USERPROFILE%\.live2d-agent\bin\live2d.cmd" model list

@@ -72,7 +72,86 @@ The exact expression names, motion groups, indices and parameter IDs come from
 this file and the `.moc3`; the app reports them through `live2d caps --json`.
 Never invent IDs.
 
+## Declaring models in the repository
+
+The repository keeps installation defaults in two editable files. They are read
+only by the setup scripts; the running app does not read them.
+
+- `live2d.config.json` — Core settings, the catalog path, the default model id
+  and the list of models to install.
+- `live2d.models.json` — a map of model id to model definition. One file can
+  define any number of models.
+
+`live2d.models.json`:
+
+```json
+{
+  "version": 1,
+  "models": {
+    "hiyori": {
+      "displayName": "Hiyori",
+      "url": "https://example.com/hiyori.zip",
+      "variant": "hiyori_pro",
+      "scale": 1.2
+    },
+    "hiyori-free": {
+      "displayName": "Hiyori (Free)",
+      "url": "https://example.com/hiyori.zip",
+      "variant": "hiyori_free",
+      "scale": 1.2
+    }
+  }
+}
+```
+
+`live2d.config.json` selects from that catalog:
+
+```json
+{
+  "version": 1,
+  "core": { "url": "https://cubism.live2d.com/sdk-web/core/06/live2dcubismcore.min.js", "acceptLicense": true },
+  "models": {
+    "file": "live2d.models.json",
+    "default": "hiyori",
+    "install": ["hiyori", "hiyori-free"]
+  },
+  "setup": { "skillDest": "~/.live2d-agent/skills" }
+}
+```
+
+| Catalog field | Required | Meaning |
+| --- | --- | --- |
+| `displayName` | no | Name shown by `model list`; defaults to the id. |
+| `url` | no | Model zip URL. May be omitted only when the model is already installed. |
+| `variant` | no | Directory prefix inside the zip (for example `hiyori_pro`). |
+| `scale` | no | Display scale, 0.1..4. |
+| `sha256`, `size` | no | Download integrity checks. |
+| `offsetX`, `offsetY` | no | Display offsets, -1..1. |
+| `idleGroup` | no | Motion group used for idle behaviour. |
+| `defaultExpression` | no | Expression applied on load/reset. |
+| `bubbleAnchor` | no | `{ "x": 0..1, "y": 0..1 }` speech-bubble anchor. |
+| `hitActions` | no | Tap/hit reactions (same shape as `live2d-agent.json`). |
+
+Behavior:
+
+- `npm run setup` installs `models.install` (and adds `models.default` if it is
+  missing from that list), writes each entry's display fields to
+  `models/<id>/live2d-agent.json`, then writes `models.default` to the runtime
+  `config.json`. A later `model load <id>` persists the user's choice; running
+  setup again restores `models.default`.
+- Multiple catalog entries may share one `url`; the zip is downloaded once and
+  each `variant` is installed separately.
+- `npm run setup -- --model <id>` installs only that model and makes it the
+  default. `npm run setup -- --models a,b` installs exactly those.
+- `npm run setup:models` installs catalog models without rebuilding, and
+  `npm run setup:models -- --list` prints the catalog and installed state.
+- A legacy single inline `model` object in `live2d.config.json` is still accepted
+  by setup, but new projects should use `live2d.models.json`.
+
 ## Installing a model
+
+Two installation paths are available: catalog download (above), or a model
+directory you already own:
 
 ```bat
 npm run setup:model -- --from "D:\Live2D\MyModel"
@@ -180,6 +259,11 @@ live2d model list --json
 live2d model load <id>
 ```
 
+- Only installed model directories appear in `model list`; a model declared in
+  `live2d.models.json` but absent from `models.install` is not installed.
+- Use `npm run setup:models -- --list` to compare the catalog with installed
+  models, and `npm run setup:models -- --models <id>` to add one without a full
+  rebuild.
 - The active model id is stored in `config.json`; the app restores it on the
   next launch.
 - If the configured model is missing, the app chooses another installed model
