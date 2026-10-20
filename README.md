@@ -67,17 +67,19 @@ npm run setup -- --skill-dest "%USERPROFILE%\.claude\skills"
 | 字段 | 默认值 | 作用 |
 | --- | --- | --- |
 | `core.url` | `https://cubism.live2d.com/sdk-web/core/06/live2dcubismcore.min.js` | 官方 Cubism Core 6.x CDN |
-| `core.sha256` | 当前 6.x 文件哈希 | 下载校验；CDN 更新后不匹配时改这里或加 `--no-verify` |
-| `core.acceptLicense` | `true` | 运行 setup 即表示接受 Live2D Proprietary Software License；设为 `false` 时会拒绝自动下载 |
+| `core.acceptLicense` | `true` | 运行 setup 即表示接受 Live2D Proprietary Software License；设为 `false` 时拒绝自动下载 |
 | `model.url` | 项目指定的 Hiyori zip | 默认模型压缩包地址 |
-| `model.sha256` / `model.size` | 当前 zip 的哈希/字节数 | 下载完整性校验 |
-| `model.id` | `hiyori` | 安装目录名，同时是 `model load` 使用的 id |
+| `model.id` | `hiyori` | 安装目录名，也是 `model load` 的 id |
+| `model.displayName` | `Hiyori` | 模型列表显示名 |
 | `model.variant` | `hiyori_pro` | zip 内变体；可改为 `hiyori_free` |
-| `model.scale` | `1.2` | 默认显示缩放；不同模型可按需调整 |
-| `setup.installDependencies` | `true` | 缺少依赖时是否自动 `npm install` |
-| `setup.build` | `true` | 是否执行 `npm run build` |
-| `setup.launch` | `true` | 是否在安装后启动 app |
-| `setup.skillDest` | `~/.live2d-agent/skills` | setup 顺便安装 Skill 到该目录；设为 `null` 可跳过，改成 `%USERPROFILE%\.claude\skills` 可直接给 Claude Code |
+| `model.scale` | `1.2` | 默认显示缩放 |
+| `setup.skillDest` | `~/.live2d-agent/skills` | 顺便安装 Skill 到该目录；`null` 跳过 |
+
+可选字段（默认不写，需要时再加）：
+
+- `core.sha256` / `model.sha256` / `model.size`：下载完整性校验；
+- `setup.installDependencies` / `setup.build` / `setup.launch`：设为 `false` 可跳过对应步骤（默认均为 `true`）；
+- `model.idleGroup` / `model.offsetX` / `model.offsetY`：模型动作组和位置微调。
 
 常用覆盖参数（不必改文件）：
 
