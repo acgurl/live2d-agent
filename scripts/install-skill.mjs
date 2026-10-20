@@ -290,21 +290,6 @@ function mcpSnippet(launcherPath) {
   );
 }
 
-function nodeSnippet(scriptPath) {
-  return JSON.stringify(
-    {
-      mcpServers: {
-        live2d: {
-          command: "node",
-          args: [scriptPath],
-        },
-      },
-    },
-    null,
-    2,
-  );
-}
-
 async function main() {
   const options = parseArgs(process.argv.slice(2));
   if (options.help) {
@@ -407,21 +392,19 @@ async function main() {
   console.log("  Other Agent Skills clients:      <their-skills-dir>/live2d-pet");
   console.log("Restart the agent/client after installing so it discovers the skill.");
   console.log("");
-  console.log("MCP config - Claude Desktop (" + claudeDesktopConfig + "):");
+  console.log("MCP config (one block for Claude Desktop, Cursor or any MCP client):");
+  console.log("  Claude Desktop file: " + claudeDesktopConfig);
+  console.log("  Cursor file:         .cursor/mcp.json or ~/.cursor/mcp.json");
   console.log(mcpSnippet(mcpLauncher));
   console.log("");
-  console.log("MCP config - Cursor (.cursor/mcp.json or ~/.cursor/mcp.json):");
-  console.log(mcpSnippet(mcpLauncher));
-  console.log("");
-  console.log("MCP - Claude Code command line:");
   if (process.platform === "win32") {
-    console.log('  claude mcp add live2d -- cmd /c "' + mcpLauncher + '"');
+    console.log("Claude Code: claude mcp add live2d -- cmd /c \"" + mcpLauncher + "\"");
   } else {
-    console.log("  claude mcp add live2d -- " + JSON.stringify(mcpLauncher));
+    console.log("Claude Code: claude mcp add live2d -- " + JSON.stringify(mcpLauncher));
   }
   console.log("");
-  console.log("MCP - Node fallback (no Electron-as-Node launcher):");
-  console.log(nodeSnippet(MCP_TARGET));
+  console.log("If the launcher cannot run, start the MCP server directly:");
+  console.log('  node "' + MCP_TARGET + '"');
   console.log("");
   console.log("Next steps:");
   console.log('  1. "' + launcherCmd + '" version');
