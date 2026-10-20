@@ -64,6 +64,12 @@ npm run setup -- --skill-dest "%USERPROFILE%\.claude\skills"
 [live2d.config.json](live2d.config.json)，不需要改脚本。修改后重新执行
 `npm run setup`；如果模型已存在，加上 `--force` 才会重新下载/安装。
 
+> 仓库里需要你修改的安装配置只有 `live2d.config.json` 一个。
+> `tsconfig.json` / `vite.config.ts` / `vitest.config.ts` 是构建工具配置；
+> 运行后 `~/.live2d-agent/` 下的 `config.json`（窗口/模型偏好）、`install.json`、
+> `runtime.json` 以及模型目录的 `live2d-agent.json`（可选显示微调）都是自动生成的
+> 状态文件，不需要手改。
+
 | 字段 | 默认值 | 作用 |
 | --- | --- | --- |
 | `core.url` | `https://cubism.live2d.com/sdk-web/core/06/live2dcubismcore.min.js` | 官方 Cubism Core 6.x CDN |
