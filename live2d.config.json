@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "core": {
+    "url": "https://cubism.live2d.com/sdk-web/core/06/live2dcubismcore.min.js",
+    "sha256": "8741f739779b5d5210872bd3d7d99f0f1e56e6c87409e7d26d6bb4b80aa1ef47",
+    "acceptLicense": true
+  },
+  "model": {
+    "id": "hiyori",
+    "displayName": "Hiyori",
+    "url": "https://acgurl.qzz.io/file/1792491911029_hiyori_zh-Hans.zip",
+    "sha256": "598ca2e9aeae2ec3d40fd7fdc7a1a66989aa621c34ffabbc4f6dfee14577a7bf",
+    "size": 46203600,
+    "variant": "hiyori_pro",
+    "scale": 1.2,
+    "idleGroup": "Idle"
+  },
+  "setup": {
+    "installDependencies": true,
+    "build": true,
+    "launch": true,
+    "skillDest": "~/.live2d-agent/skills"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "live2d-agent",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Desktop Live2D companion with a local control API, CLI, MCP server and agent skill.",
+  "type": "module",
+  "main": "dist/main.cjs",
+  "bin": {
+    "live2d": "dist/cli.mjs",
+    "live2d-mcp": "dist/mcp.mjs"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "npm run build:node && npm run build:renderer && npm run build:skill",
+    "build:renderer": "vite build",
+    "build:node": "node scripts/build-node.mjs",
+    "build:skill": "node scripts/build-skill.mjs",
+    "start": "node scripts/start.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint src scripts test",
+    "test": "vitest run",
+    "setup": "node scripts/setup.mjs",
+    "install:all": "node scripts/setup.mjs",
+    "setup:core": "node scripts/setup-core.mjs",
+    "setup:model": "node scripts/setup-model.mjs",
+    "install:skill": "node scripts/install-skill.mjs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "commander": "^15.0.0",
+    "easy-live2d": "1.0.0",
+    "fflate": "^0.8.3",
+    "pixi.js": "^8.22.0",
+    "sirv": "^3.0.2",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "electron": "^44.9.1",
+    "esbuild": "^0.28.2",
+    "oxlint": "^1.89.0",
+    "typescript": "^5.9.3",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
+  },
+  "license": "MIT"
+}
